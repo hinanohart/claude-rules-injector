@@ -1,7 +1,7 @@
 {
   "name": "claude-rules-injector",
   "description": "Auto-injects a 'critical rules' prompt at the start of every Claude Code turn via UserPromptSubmit hook. Includes an r-check skill for on-demand rule lookup. Behavior-shaping, not permission-enforcement.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "hinanohart"
   },

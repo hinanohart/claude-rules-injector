@@ -1,8 +1,10 @@
-# claude-guardrails
+# claude-rules-injector
 
-> Auto-inject a "critical rules" prompt at the top of every turn in Claude Code, plus a `r-check` skill for on-demand rule lookup.
+> Auto-inject a "critical rules" prompt at the start of every turn in Claude Code, plus a `r-check` skill for on-demand rule lookup.
 
-`claude-guardrails` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as additionalContext on every prompt. Violations short-circuit the task instead of leaking through.
+> _Previously named `claude-guardrails`. Old URLs redirect; clone URLs still work via GitHub's auto-redirect._
+
+`claude-rules-injector` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as additionalContext on every prompt. Violations short-circuit the task instead of leaking through.
 
 It is opinionated: 13 rules, English summaries with Japanese author-original quotes preserved verbatim per R16. Fork it, edit `critical-rules.md`, and reinstall — the wiring is the value, the rules are an example.
 
@@ -10,9 +12,23 @@ It is opinionated: 13 rules, English summaries with Japanese author-original quo
 
 ## Install
 
+### Option A — Plugin (recommended, Claude Code v2.x+)
+
+Inside Claude Code:
+
+```text
+/plugin marketplace add hinanohart/claude-rules-injector
+/plugin install claude-rules-injector@claude-rules-injector
+/reload-plugins
+```
+
+The plugin bundles `critical-rules.md`, the hook, and the `r-check` skill (namespaced as `/claude-rules-injector:r-check`). Updates flow via the marketplace; no manual `settings.json` edits.
+
+### Option B — Manual install (legacy / for older Claude Code)
+
 ```bash
-git clone https://github.com/hinanohart/claude-guardrails.git
-cd claude-guardrails
+git clone https://github.com/hinanohart/claude-rules-injector.git
+cd claude-rules-injector
 bash install.sh
 ```
 
@@ -20,9 +36,9 @@ The installer:
 - copies `critical-rules.md` to `~/.claude/critical-rules.md`
 - installs the hook at `~/.claude/hooks/inject-rules.sh`
 - installs the `r-check` skill at `~/.claude/skills/r-check/`
-- registers the hook in `~/.claude/settings.json` (idempotent; creates `.bak.<epoch>` backup before any edit)
+- registers the hook in `~/.claude/settings.json` (idempotent; creates `.bak.<epoch>-<pid>` backup before any edit)
 
-Restart Claude Code to activate. To confirm it works, send any prompt — you should see the rules injected at the top.
+Restart Claude Code after install. To confirm it works, send any prompt — the rules are re-attached as additionalContext on every turn.
 
 ## Disable / customize
 
@@ -35,11 +51,17 @@ Restart Claude Code to activate. To confirm it works, send any prompt — you sh
 
 ## Uninstall
 
+### Plugin install:
+```text
+/plugin uninstall claude-rules-injector@claude-rules-injector
+```
+
+### Manual install:
 ```bash
 bash install.sh --uninstall
 ```
 
-This writes a fresh `settings.json.bak.<epoch>-<pid>`, then edits `settings.json` in place to remove only the `claude-guardrails` hook entry (sibling hooks are preserved). It removes the hook script and the skill. If `$HOME/.claude/critical-rules.md` was modified after install, it is preserved as `critical-rules.md.bak.<epoch>-<pid>` instead of being deleted.
+The manual uninstaller writes a fresh `settings.json.bak.<epoch>-<pid>`, then edits `settings.json` in place to remove only the `claude-rules-injector` hook entry (sibling hooks are preserved). It removes the hook script and the skill. If `$HOME/.claude/critical-rules.md` was modified after install, it is preserved as `critical-rules.md.bak.<epoch>-<pid>` instead of being deleted.
 
 ## What's in the rules
 
@@ -71,21 +93,26 @@ If you don't need that guarantee, just use `CLAUDE.md` and skip this package.
 
 ## Known limitations
 
-- **Not yet packaged as a Claude Code plugin.** Anthropic's plugin marketplace would replace the `install.sh` settings-mutation approach with a single `/plugin install` command. Migration is on the roadmap; for now this is a manual hook installer.
-- **No CI, no version tags, no CHANGELOG.** Tag a commit yourself if you depend on a specific revision.
-- **Behavior-shaping, not permission-enforcement.** The name "guardrails" is industry-overloaded — see Non-goals above. Use Claude Code's permission system for hard limits.
+- **Not yet listed in the official Anthropic plugin marketplace.** Self-hosted as a single-plugin marketplace at this repo; users must `/plugin marketplace add` it explicitly. Submitting to `claude-plugins-official` is a manual form: [claude.ai/settings/plugins/submit](https://claude.ai/settings/plugins/submit).
+- **Behavior-shaping, not permission-enforcement.** Use Claude Code's permission system for hard limits — see Non-goals above.
 
 ## Layout
 
 ```
-claude-guardrails/
+claude-rules-injector/
+├── .claude-plugin/
+│   ├── plugin.json            # plugin manifest (for /plugin install)
+│   └── marketplace.json       # single-plugin marketplace catalog
 ├── critical-rules.md          # the rules (edit this to customize)
-├── README.md
-├── install.sh                 # idempotent installer
-├── hooks/inject-rules.sh      # UserPromptSubmit hook (fail-open, exit 0)
+├── hooks/
+│   ├── hooks.json             # plugin-format hook registration
+│   └── inject-rules.sh        # UserPromptSubmit hook (fail-open, exit 0)
 ├── skills/r-check/
 │   ├── SKILL.md               # skill definition for Claude Code
 │   └── check.sh               # rule-id → section extractor
+├── install.sh                 # idempotent legacy installer
+├── README.md
+├── CHANGELOG.md
 └── LICENSE                    # MIT
 ```
 

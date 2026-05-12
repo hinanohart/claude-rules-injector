@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and the project follows semver.
 
+## [v0.2.0] — 2026-05-13
+
+### Added
+- **Claude Code plugin support.** The repo is now a self-hosted single-plugin marketplace. Install with `/plugin marketplace add hinanohart/claude-rules-injector` + `/plugin install claude-rules-injector@claude-rules-injector`.
+  - `.claude-plugin/plugin.json` — plugin manifest (v0.2.0, MIT, author, homepage).
+  - `.claude-plugin/marketplace.json` — marketplace catalog with one plugin entry.
+  - `hooks/hooks.json` — plugin-format hook registration. Uses `${CLAUDE_PLUGIN_ROOT}` to locate the hook script and rules file, so the same script works in both plugin and manual install modes.
+- Skill auto-namespaces to `/claude-rules-injector:r-check` under the plugin.
+
+### Changed
+- **Repo renamed:** `claude-guardrails` → `claude-rules-injector`. GitHub auto-redirects the old URL; existing clones continue to work.
+- README documents both install paths (plugin and manual) and the legacy redirect notice.
+- `install.sh` and `hooks/inject-rules.sh` self-identify as `claude-rules-injector` in comments and uninstall messages.
+
+### Notes
+- The Anthropic official marketplace (`claude-plugins-official`) requires manual submission via [claude.ai/settings/plugins/submit](https://claude.ai/settings/plugins/submit) — not automatable.
+- Existing manual installations are unaffected; `install.sh` and `--uninstall` behavior unchanged.
+
 ## [v0.1.0] — 2026-05-13
 
 Initial public release. Two post-publish audit cycles applied before tagging.
@@ -20,4 +38,4 @@ Initial public release. Two post-publish audit cycles applied before tagging.
 
 ### Known limitations
 - Not yet packaged as a Claude Code plugin. Migration is on the roadmap.
-- Name "claude-guardrails" is industry-overloaded; this package shapes behavior, not permissions. See README §Non-goals.
+- Name "claude-guardrails" is industry-overloaded; this package shapes behavior, not permissions. See README §Non-goals. (Resolved in v0.2.0 by renaming to `claude-rules-injector`.)

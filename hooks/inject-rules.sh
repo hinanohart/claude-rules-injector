@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claude-guardrails: UserPromptSubmit hook
+# claude-rules-injector: UserPromptSubmit hook
 # Injects critical-rules.md as additionalContext on every user prompt.
 # Always exits 0 (fail-open) — never blocks Claude Code on hook errors.
 

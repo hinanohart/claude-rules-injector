@@ -1,0 +1,15 @@
+{
+  "description": "Inject critical-rules.md as additionalContext on every user prompt.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_RULES_PATH=\"${CLAUDE_PLUGIN_ROOT}/critical-rules.md\" bash \"${CLAUDE_PLUGIN_ROOT}/hooks/inject-rules.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

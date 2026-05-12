@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claude-guardrails installer
+# claude-rules-injector installer
 # Idempotent: safe to run multiple times. Creates timestamped backups before modifying settings.json.
 # Usage: bash install.sh             # install / update
 #        bash install.sh --uninstall # remove everything this installer added
@@ -93,7 +93,7 @@ uninstall_critical_rules_md() {
 }
 
 if [ "${1:-}" = "--uninstall" ]; then
-  echo "Uninstalling claude-guardrails from $CLAUDE_DIR ..."
+  echo "Uninstalling claude-rules-injector from $CLAUDE_DIR ..."
   backup_settings
   uninstall_critical_rules_md
   rm -f "$CLAUDE_DIR/hooks/inject-rules.sh"

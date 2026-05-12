@@ -13,9 +13,13 @@ This skill returns the full text of one rule from `critical-rules.md`.
 - Before writing operational text (`→` lines) for an R-rule per R16 (declare-understanding obligation).
 
 ## How to invoke
-Run `check.sh <rule-id>`:
+Run `check.sh <rule-id>`. The path depends on install mode:
 
 ```bash
+# Plugin install (via /plugin install):
+"${CLAUDE_PLUGIN_ROOT}/skills/r-check/check.sh" R11
+
+# Manual install (via install.sh):
 ~/.claude/skills/r-check/check.sh R11
 ```
 

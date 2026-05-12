@@ -9,7 +9,7 @@ It is opinionated: 13 rules, English summaries with Japanese author-original quo
 ## Install
 
 ```bash
-git clone https://github.com/<your-fork>/claude-guardrails.git
+git clone https://github.com/hinanohart/claude-guardrails.git
 cd claude-guardrails
 bash install.sh
 ```
@@ -34,14 +34,10 @@ Restart Claude Code to activate. To confirm it works, send any prompt — you sh
 ## Uninstall
 
 ```bash
-rm ~/.claude/critical-rules.md
-rm ~/.claude/hooks/inject-rules.sh
-rm -rf ~/.claude/skills/r-check
-# Restore the most recent settings backup:
-ls -1t ~/.claude/settings.json.bak.* | head -1 | xargs -I{} cp {} ~/.claude/settings.json
+bash install.sh --uninstall
 ```
 
-Or just edit `~/.claude/settings.json` and remove the `UserPromptSubmit` entry pointing at `inject-rules.sh`.
+This removes `critical-rules.md`, the hook, and the skill, and restores the most recent `settings.json` backup if one exists. If no backup exists, it edits `settings.json` in place to remove only the `claude-guardrails` hook entry.
 
 ## What's in the rules
 

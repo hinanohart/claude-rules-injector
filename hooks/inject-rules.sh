@@ -20,9 +20,14 @@ if [ -z "$P" ] && [ -r "$HOME/.claude/critical-rules.path" ]; then
 fi
 P="${P:-$HOME/.claude/critical-rules.md}"
 
-[ -r "$P" ] || exit 0
+[ -f "$P" ] && [ -r "$P" ] || exit 0
 
-printf 'UserPromptSubmit hook: claude-guardrails injecting critical-rules\n\n<critical-rules>\n'
+# Reject pathological inputs (oversized file, non-regular) — prevents accidental
+# /etc/passwd-style injections if CLAUDE_RULES_PATH is misconfigured.
+SZ="$(wc -c < "$P" 2>/dev/null || echo 0)"
+[ "$SZ" -le 262144 ] || exit 0
+
+printf '<critical-rules>\n'
 cat "$P"
 printf '\n</critical-rules>\n'
 exit 0

@@ -1,6 +1,6 @@
 ---
 name: r-check
-description: Look up a single critical rule by its ID (R1, R2, R5, R7, R8, R11, R12, R13, R14, R15, R16, R17, R18). Use this when the user references a rule ID, when you suspect a rule violation, or when you need to recall the exact wording of a rule before acting.
+description: Use when the user references an R-rule by ID (R1, R2, R5, R7, R8, R11, R12, R13, R14, R15, R16, R17, R18), when you suspect a rule violation, or when you need the exact wording of a rule before writing operational text. Returns the full text of one rule from critical-rules.md.
 ---
 
 # r-check — rule lookup
@@ -16,10 +16,18 @@ This skill returns the full text of one rule from `critical-rules.md`.
 Run `check.sh <rule-id>`:
 
 ```bash
-bash $CLAUDE_DIR/skills/r-check/check.sh R11
+~/.claude/skills/r-check/check.sh R11
 ```
 
 Argument: a rule ID like `R11`, `R14`, `R17`. Output: the full rule section from `critical-rules.md`.
+
+## Exit codes
+| Code | Meaning |
+|---|---|
+| 0 | rule found, printed to stdout |
+| 1 | rules file not readable (path resolution failed) |
+| 2 | invalid rule ID argument |
+| 3 | rule ID valid but section not found |
 
 ## Rules in scope
 R1, R2, R5, R7, R8, R11, R12, R13, R14, R15, R16, R17, R18.

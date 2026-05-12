@@ -7,32 +7,45 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_DIR="${CLAUDE_DIR:-$HOME/.claude}"
+# Hardcoded — Claude Code reads $HOME/.claude/settings.json. Keeping this
+# fixed prevents the half-wired-CLAUDE_DIR-override class of bug where
+# install.sh writes somewhere the hook+skill can't read from.
+CLAUDE_DIR="$HOME/.claude"
 SETTINGS="$CLAUDE_DIR/settings.json"
-TS="$(date +%s%N 2>/dev/null || date +%s)"
+# Epoch + PID — portable (BSD `date` lacks %N) and unique across rapid re-installs.
+TS="$(date +%s)-$$"
 HOOK_CMD="$CLAUDE_DIR/hooks/inject-rules.sh"
+
+prune_old_backups() {
+  # Retain the 3 most recent .bak.* files. Array-based to avoid GNU-only `xargs -r`.
+  local old=()
+  while IFS= read -r f; do old+=("$f"); done < <(ls -1t "$SETTINGS".bak.* 2>/dev/null | tail -n +4)
+  [ "${#old[@]}" -gt 0 ] && rm -- "${old[@]}" || true
+}
 
 backup_settings() {
   [ -f "$SETTINGS" ] || return 0
   ( umask 077 && cp "$SETTINGS" "$SETTINGS.bak.$TS" )
   echo "[ok] backup -> $SETTINGS.bak.$TS (contains your previous settings.json; delete when no longer needed)"
-  # Retain only the 3 most recent backups.
-  # shellcheck disable=SC2012
-  ls -1t "$SETTINGS".bak.* 2>/dev/null | tail -n +4 | xargs -r rm --
+  prune_old_backups
 }
 
 remove_hook_jq() {
   command -v jq >/dev/null 2>&1 || return 1
   [ -f "$SETTINGS" ] || return 0
   tmp="$(mktemp)"
-  jq --arg cmd "$HOOK_CMD" '
+  if ! jq --arg cmd "$HOOK_CMD" '
     if .hooks.UserPromptSubmit == null then . else
       .hooks.UserPromptSubmit |= (
         map(.hooks |= map(select(.command? != $cmd)))
         | map(select((.hooks // []) | length > 0))
       )
     end
-  ' "$SETTINGS" > "$tmp"
+  ' "$SETTINGS" > "$tmp"; then
+    rm -f "$tmp"
+    echo "[err] jq failed to parse $SETTINGS — refusing to overwrite. Fix the file and re-run." >&2
+    return 2
+  fi
   mv "$tmp" "$SETTINGS"
 }
 
@@ -43,31 +56,55 @@ remove_hook_py() {
 import json, sys
 path, cmd = sys.argv[1], sys.argv[2]
 try:
-    with open(path) as f: data = json.load(f)
-except (json.JSONDecodeError, FileNotFoundError):
+    with open(path) as f:
+        data = json.load(f)
+except FileNotFoundError:
     sys.exit(0)
+except json.JSONDecodeError as e:
+    print(f"[err] {path} is not valid JSON ({e}); refusing to overwrite. Fix the file and re-run.", file=sys.stderr)
+    sys.exit(1)
 ups = data.get("hooks", {}).get("UserPromptSubmit")
-if not isinstance(ups, list): sys.exit(0)
+if not isinstance(ups, list):
+    sys.exit(0)
 new_ups = []
 for entry in ups:
-    if not isinstance(entry, dict): new_ups.append(entry); continue
+    if not isinstance(entry, dict):
+        new_ups.append(entry); continue
     hooks = [h for h in entry.get("hooks", []) if not (isinstance(h, dict) and h.get("command") == cmd)]
-    if hooks: entry["hooks"] = hooks; new_ups.append(entry)
+    if hooks:
+        entry["hooks"] = hooks
+        new_ups.append(entry)
 data["hooks"]["UserPromptSubmit"] = new_ups
-with open(path, "w") as f: json.dump(data, f, indent=2)
+with open(path, "w") as f:
+    json.dump(data, f, indent=2)
 PYEOF
+}
+
+uninstall_critical_rules_md() {
+  # Preserve user edits: if installed file differs from repo version, keep as .bak.
+  local target="$CLAUDE_DIR/critical-rules.md"
+  [ -f "$target" ] || return 0
+  if cmp -s "$REPO_DIR/critical-rules.md" "$target"; then
+    rm -f "$target"
+  else
+    mv "$target" "$target.bak.$TS"
+    echo "[warn] $target differed from repo version; preserved as $target.bak.$TS" >&2
+  fi
 }
 
 if [ "${1:-}" = "--uninstall" ]; then
   echo "Uninstalling claude-guardrails from $CLAUDE_DIR ..."
   backup_settings
-  rm -f "$CLAUDE_DIR/critical-rules.md" "$CLAUDE_DIR/hooks/inject-rules.sh"
+  uninstall_critical_rules_md
+  rm -f "$CLAUDE_DIR/hooks/inject-rules.sh"
   rm -f "$CLAUDE_DIR/skills/r-check/SKILL.md" "$CLAUDE_DIR/skills/r-check/check.sh"
   rmdir "$CLAUDE_DIR/skills/r-check" 2>/dev/null || true
-  if ! remove_hook_jq && ! remove_hook_py; then
-    echo "[warn] neither jq nor python3 found — please remove the inject-rules.sh entry from $SETTINGS manually." >&2
-  else
+  if remove_hook_jq; then
     echo "[ok] removed hook entry from $SETTINGS"
+  elif remove_hook_py; then
+    echo "[ok] removed hook entry from $SETTINGS"
+  else
+    echo "[warn] neither jq nor python3 found — please remove the inject-rules.sh entry from $SETTINGS manually." >&2
   fi
   echo "Done. Restart Claude Code to deactivate."
   exit 0
@@ -94,14 +131,18 @@ merge_settings_jq() {
   tmp="$(mktemp)"
   if [ -f "$SETTINGS" ]; then
     # Dedup at the per-hook level so we never drop sibling hooks that share an entry.
-    jq --arg cmd "$HOOK_CMD" '
+    if ! jq --arg cmd "$HOOK_CMD" '
       .hooks //= {} |
       .hooks.UserPromptSubmit //= [] |
       .hooks.UserPromptSubmit |= (
         (map(.hooks |= map(select(.command? != $cmd))) | map(select((.hooks // []) | length > 0)))
         + [{matcher: "", hooks: [{type: "command", command: $cmd}]}]
       )
-    ' "$SETTINGS" > "$tmp"
+    ' "$SETTINGS" > "$tmp"; then
+      rm -f "$tmp"
+      echo "[err] jq failed to parse $SETTINGS — refusing to overwrite. Fix the file and re-run." >&2
+      return 2
+    fi
   else
     jq -n --arg cmd "$HOOK_CMD" '{hooks: {UserPromptSubmit: [{matcher: "", hooks: [{type: "command", command: $cmd}]}]}}' > "$tmp"
   fi
@@ -138,9 +179,10 @@ PYEOF
   echo "[ok] settings.json updated via python3"
 }
 
+# Try jq first; fall back to python3 if jq is missing OR jq parse-fails on bad JSON.
 if ! merge_settings_jq; then
   if ! merge_settings_py; then
-    echo "[err] neither jq nor python3 found. Install one or edit $SETTINGS manually:" >&2
+    echo "[err] neither jq nor python3 found (or both refused malformed JSON). Install one or edit $SETTINGS manually:" >&2
     echo "  add to .hooks.UserPromptSubmit: {\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"$HOOK_CMD\"}]}" >&2
     exit 1
   fi

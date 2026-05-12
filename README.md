@@ -2,9 +2,11 @@
 
 > Auto-inject a "critical rules" prompt at the top of every turn in Claude Code, plus a `r-check` skill for on-demand rule lookup.
 
-`claude-guardrails` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — Claude may not re-read them mid-session.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-injected verbatim on every prompt. Violations short-circuit the task instead of leaking through.
+`claude-guardrails` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as additionalContext on every prompt. Violations short-circuit the task instead of leaking through.
 
 It is opinionated: 13 rules, English summaries with Japanese author-original quotes preserved verbatim per R16. Fork it, edit `critical-rules.md`, and reinstall — the wiring is the value, the rules are an example.
+
+> **Status:** Personal config dump, MIT-licensed for forking. The author uses this for their own workflow; no SLA, support guarantee, or roadmap. Issues and PRs are welcome but may be answered slowly or not at all. The bundled `critical-rules.md` is an example — replace with your own rules before relying on it.
 
 ## Install
 
@@ -37,7 +39,7 @@ Restart Claude Code to activate. To confirm it works, send any prompt — you sh
 bash install.sh --uninstall
 ```
 
-This removes `critical-rules.md`, the hook, and the skill, and restores the most recent `settings.json` backup if one exists. If no backup exists, it edits `settings.json` in place to remove only the `claude-guardrails` hook entry.
+This writes a fresh `settings.json.bak.<epoch>-<pid>`, then edits `settings.json` in place to remove only the `claude-guardrails` hook entry (sibling hooks are preserved). It removes the hook script and the skill. If `$HOME/.claude/critical-rules.md` was modified after install, it is preserved as `critical-rules.md.bak.<epoch>-<pid>` instead of being deleted.
 
 ## What's in the rules
 
@@ -63,9 +65,15 @@ See [`critical-rules.md`](./critical-rules.md) for the full text.
 
 ## Why a hook and not just `CLAUDE.md`?
 
-`CLAUDE.md` is loaded once and may be paged out of attention as the conversation grows. The hook re-injects the rules at the *top* of every user prompt, where they get the strongest attention. For rules where drift is unacceptable (security, secret handling, cross-session privacy), this is the difference between "usually followed" and "consistently followed."
+`CLAUDE.md` is loaded once into the session prefix. As the conversation grows, earlier instructions can lose salience against more recent context. The hook re-attaches the rules as additionalContext on every prompt — the repetition keeps them fresh and the system-reminder framing increases instruction-following adherence. For rules where drift is unacceptable (security, secret handling, cross-session privacy), this is the difference between "usually followed" and "consistently followed."
 
 If you don't need that guarantee, just use `CLAUDE.md` and skip this package.
+
+## Known limitations
+
+- **Not yet packaged as a Claude Code plugin.** Anthropic's plugin marketplace would replace the `install.sh` settings-mutation approach with a single `/plugin install` command. Migration is on the roadmap; for now this is a manual hook installer.
+- **No CI, no version tags, no CHANGELOG.** Tag a commit yourself if you depend on a specific revision.
+- **Behavior-shaping, not permission-enforcement.** The name "guardrails" is industry-overloaded — see Non-goals above. Use Claude Code's permission system for hard limits.
 
 ## Layout
 

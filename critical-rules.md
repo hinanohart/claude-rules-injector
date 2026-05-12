@@ -63,6 +63,7 @@ EN: Isolation is a means, not an end — Docker is only one example; the scope i
 🔥 Author-original (JP, 改変禁止): 「大規模に始める前は議論する」「前提を最適な最高なものを作れるか」「Linux みたいな完全に 0 から 1 / 最高のものを作る心構え」
 🔥 Author-original (JP, 改変禁止): 「OSSスターがたくさんつく感じね」「配布形態シミュレーション」
 EN: Build with Linux-grade 0→1 ambition. For OSS publication, simulate star-tier expectations and distribution format up-front.
+→ **Existing assets first. 0→1 / full new-build only when triggers fire. For existing OSS / existing systems, combine with R17 "existing-fix first".**
 → **Triggers**: OSS publish / `gh repo create` / `git push -u origin main` / Write > 300 lines / fundamental rework of an existing system.
 → **4-step procedure**: doubt the premise → 2–3 agent discussion → justify the most-optimal choice → record in memory.
 → On conflict with R7: R14 wins. If R13 applies, R13 takes top priority.
@@ -84,13 +85,14 @@ EN: Understand intent at 100%. Don't proceed on weird interpretations. Read inst
 → **Operational-text declaration mandate (drift 100% prevention core)**: when writing/editing R-rule operational text (`→` lines) / R supplements / R-related hooks, present "私の理解はこうです: <strict original summary>" and obtain 1-char user approval before writing. No approval → no write. If an existing patch suffices, patch in place.
 → **Exception**: translation / summary / language conversion tasks are exempted only after explicit user confirmation; unconfirmed exceptions don't apply. In memory-save contexts, the author-original must accompany the entry.
 
-## R17 Write-target thorough check + root-fix discipline (TIER 1.5)
+## R17 Write-target thorough check + existing-fix-first (TIER 1.5)
 🔥 Author-original (JP, 改変禁止): 「これ今から描くやつに欠陥や漏れがないか徹底的にチェック前提すら疑って致命的なことはないか と言った時に最適ではなかったらちゃんと修正してね微修正とかじゃなくてそもそもそれが設計もossのやり方も最適ではなかったら申し訳程度の修正なら良いけど最適ではなかったらちゃんと修正して　根本的に間違ったなら根本的に修正だと」
 🔥 Author-original (JP, 改変禁止): 「なんで言うのか単に欠陥とかセキュリティ的問題にプラスそれが最適なものかみたいなossならそれが最適なossの設計か？とかそもそも例えばossがこれはスキルで出すべきかフックかとかcliだけなのかmdなのかとかそう言う最適？」
 🔥 Author-original (JP, 改変禁止, premise-doubt elevation): 「調査の仕方すら疑わないといけない」
 🔥 Author-original (JP, 改変禁止, root-fix runaway suppression): 「r17の根本修正が悪さをしてる大規模に作ってそれが良くなかったら全面根本修正をしてしまう普通に修正したら良いじゃんみたいな既存のやつをどうしても無理なら根本で良いけど」
 🔥 Author-original (JP, 改変禁止, nitpick hunt): 「ツッコミめる所をいちいち探せ」
 EN: For everything written, thoroughly check defects / omissions / fatal issues. Doubt even the premise — including your own investigation method. Existing-fix first; root-fix only when an existing-fix is genuinely impossible. Actively hunt for nits.
+→ **Default = existing-fix (normal patch). Root-fix / rewrite only with a one-line justification that "existing-fix is genuinely impossible".** Don't be pulled toward full rewrites by the title or verdict labels.
 → **Applies to**: all writing (code / OSS / memory / config / README / commit / agent / hook). Acts before R14 and re-fires during/after work as a complement.
 → **4-step check**: ① flaws / omissions ② doubt the premise ③ fatal? (security / privacy / data-loss / legal / existing assets) ④ fix depth.
 → **Fix-depth default order**: existing-fix (normal patch) first → root-fix / rewrite only when existing-fix is genuinely impossible. "Not optimal → immediate root-fix" is forbidden.

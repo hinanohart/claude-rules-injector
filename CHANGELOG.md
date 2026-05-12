@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and the project follows semver.
 
+## [v0.2.1] — 2026-05-13
+
+### Changed
+- **R17 title**: `Write-target thorough check + root-fix discipline` → `Write-target thorough check + existing-fix-first`. The previous "-discipline" framing acted as a retrieval anchor and biased Claude toward full rewrites for minor issues.
+- **R17 operational line**: prepended a default-existing-fix line above the other `→` lines, neutralizing pull from the title and the `REWRITE` verdict label.
+- **R14 operational line**: prepended `Existing assets first. 0→1 / full new-build only when triggers fire. For existing OSS / existing systems, combine with R17 "existing-fix first".` Author-original "Linux-grade 0→1 ambition" was mutually reinforcing R17's runaway-rewrite tendency.
+
+### Rationale
+Three-agent verification confirmed the title token (Japanese 主義 / "-discipline" / "-ism") functioned as a strong retrieval anchor that overrode the 2026-05-13 supplement clarifying "existing-fix first, root-fix only when impossible." Author-original lines remain untouched per R16 do-not-modify rule. Operational-text drift fix only — no behavioral re-interpretation.
+
 ## [v0.2.0] — 2026-05-13
 
 ### Added

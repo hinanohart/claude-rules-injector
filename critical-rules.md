@@ -59,13 +59,15 @@ EN: Agent exit kills its subprocesses. Long-running jobs belong on the parent pr
 EN: Isolation is a means, not an end — Docker is only one example; the scope is protecting critical projects.
 → **Two parallel scopes**: ① Claude → external attack surfaces (Kali / attack tools / VM connections); ② User's critical project → Claude isolation (Docker is one example; other isolation means are equally valid). Hard-banned items exist — define them in your project's R13 detail document. Violation = immediate stop + R8.
 
-## R14 Pre-large-work discussion protocol (TIER 1.5)
+## R14 Pre-large-work possibility-exploration protocol (TIER 1.5)
 🔥 Author-original (JP, 改変禁止): 「大規模に始める前は議論する」「前提を最適な最高なものを作れるか」「Linux みたいな完全に 0 から 1 / 最高のものを作る心構え」
 🔥 Author-original (JP, 改変禁止): 「OSSスターがたくさんつく感じね」「配布形態シミュレーション」
-EN: Build with Linux-grade 0→1 ambition. For OSS publication, simulate star-tier expectations and distribution format up-front.
+🔥 Author-original (JP, 改変禁止, 2026-05-17, possibility-search-core): 「議論よりも可能性の検索が大事」「論文じゃなくて良い」「OSSだけじゃなくて広く使う、大規模・時間がかかるタスクは可能性探すの大事」
+EN: Build with Linux-grade 0→1 ambition. Width of possibility exploration outranks debate. For OSS publication, simulate star-tier expectations and distribution format up-front.
 → **Existing assets first. 0→1 / full new-build only when triggers fire. For existing OSS / existing systems, combine with R17 "existing-fix first".**
-→ **Triggers**: OSS publish / `gh repo create` / `git push -u origin main` / Write > 300 lines / fundamental rework of an existing system.
-→ **4-step procedure**: doubt the premise → 2–3 agent discussion → justify the most-optimal choice → record in memory.
+→ **Triggers**: OSS publish / `gh repo create` / `git push -u origin main` / Write > 300 lines / fundamental rework of an existing system / **large or long-running tasks in general**.
+→ **4-step procedure**: doubt the premise → **3 sub-agent parallel possibility-exploration (axes: A=recent sources / B=robust-classic / C=implementation-evidence; sources chosen per-task — papers / GitHub / web / general search, no fixed priority) + 1 independent critic round** → justify the most-optimal choice → record in memory.
+→ **Width of exploration > debate.** Selection criteria: ① usable (task fit — language / deps / scope) ② recency ③ realistic implementation cost, no duplication of existing assets. Short-task fallback: A+C 2 agents + critic (critic non-skippable, 1-agent solo forbidden). For OSS publish only, add star-tier + distribution-format simulation.
 → On conflict with R7: R14 wins. If R13 applies, R13 takes top priority.
 
 ## R15 Cross-session contamination prevention (TIER 1)

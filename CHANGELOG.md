@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and the project follows semver.
 
+## [v0.2.2] — 2026-05-17
+
+### Changed
+- **R14 title**: `Pre-large-work discussion protocol` → `Pre-large-work possibility-exploration protocol`. Author confirmed (2026-05-17) that the width of possibility exploration outranks debate.
+- **R14 4-step procedure**: `2–3 agent discussion` → **3 sub-agent parallel possibility-exploration** (axes: A=recent sources, B=robust-classic, C=implementation-evidence) + 1 independent `critic` round. Sources are no longer fixed to papers — chosen per-task across papers / GitHub / web / general search with no fixed priority.
+- **R14 triggers**: added `large or long-running tasks in general` to extend beyond the OSS-publish-centric framing.
+- **R14 author-original**: appended a 2026-05-17 quote block per the do-not-modify principle (additive only — existing quotes untouched).
+
+### Rationale
+The previous `2–3 agent discussion` framing acted as an internal mental rehearsal; in practice the agent did not spawn parallel sub-agents and merely thought-out-loud. The new wording forces three parallel `document-specialist`-class sub-agents that scan papers / GitHub / web / general search with task-fit-optimal source selection, followed by an independent `critic` agent for multi-angle verification. Width of exploration replaces depth of debate as the core value. OSS-publish-only star-tier + distribution-format simulation remains as an additive condition, not the primary trigger.
+
+### Compatibility
+- Rule ID `R14` unchanged.
+- Triggers are additive (existing triggers preserved).
+- Author-original lines are additive (existing lines untouched).
+- No breaking changes to hook script or skill.
+
 ## [v0.2.1] — 2026-05-13
 
 ### Changed

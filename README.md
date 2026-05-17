@@ -70,7 +70,7 @@ The manual uninstaller writes a fresh `settings.json.bak.<epoch>-<pid>`, then ed
 | Tier | Rules | What they cover |
 |---|---|---|
 | **1 (immediate stop)** | R11, R13, R15 | Secret handling, security isolation, cross-session contamination |
-| **1.5 (special protocol)** | R14, R16, R17 | Pre-large-work discussion, 100% intent comprehension, write-target audit |
+| **1.5 (special protocol)** | R14, R16, R17 | Pre-large-work possibility-exploration, 100% intent comprehension, write-target audit |
 | **2 (auto-progress)** | R1, R2, R5, R7, R8, R12, R18 | Response style, code quality, evidence, auto-progress, failure museum, agent-bash, web-search reality-check |
 
 The numbering has intentional gaps (R0/R3/R4/R6/R9/R10 are omitted) because some rules are locale- or person-specific and shouldn't be redistributed as defaults. Gaps are preserved so downstream tooling that addresses rules by ID stays stable across forks.

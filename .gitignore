@@ -1,4 +1,36 @@
+# Editor / OS
 *.bak.*
 *.bak
 .DS_Store
 *.swp
+*~
+
+# Secrets / dotenv (never commit)
+.env
+.env.*
+!.env.example
+credentials.json
+service-account.json
+secrets.yml
+secrets.yaml
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Python caches (if examples added)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log

@@ -2,39 +2,11 @@
 
 > Auto-inject a "critical rules" prompt at the start of every turn in Claude Code, plus a `r-check` skill for on-demand rule lookup.
 
-> _Previously named `claude-guardrails`. Old URLs redirect; clone URLs still work via GitHub's auto-redirect._
-
 `claude-rules-injector` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as `additionalContext` on every prompt. Violations short-circuit the task instead of leaking through.
 
 It is opinionated: 13 rules, English summaries with Japanese author-original quotes preserved verbatim per R16. Fork it, edit `critical-rules.md`, and reinstall — the wiring is the value, the rules are an example.
 
 > **Status:** Personal config dump, MIT-licensed for forking. The author uses this for their own workflow; no SLA, support guarantee, or roadmap. Issues and PRs are welcome but may be answered slowly or not at all. The bundled `critical-rules.md` is an example — replace with your own rules before relying on it.
-
----
-
-## How it works
-
-```mermaid
-flowchart TD
-    A[User types a prompt] --> B[Claude Code UserPromptSubmit hook fires]
-    B --> C{CLAUDE_RULES_DISABLE=1?}
-    C -->|yes| Z[Pass through unchanged]
-    C -->|no| D[Resolve rules file path]
-    D --> E{File readable and within 256 KiB?}
-    E -->|no| Z
-    E -->|yes| F[Strip YAML frontmatter]
-    F --> G[Wrap in critical-rules XML tags]
-    G --> H[Append as additionalContext]
-    H --> I[Claude Code sends enriched prompt to model]
-    I --> J[Model sees rules on every turn]
-    J --> K[r-check skill for on-demand rule lookup]
-```
-
-Path resolution order for the rules file:
-
-1. `CLAUDE_RULES_PATH` env var
-2. First line of `~/.claude/critical-rules.path`
-3. Default: `~/.claude/critical-rules.md`
 
 ---
 
@@ -67,6 +39,34 @@ The installer:
 - registers the hook in `~/.claude/settings.json` (idempotent; creates `.bak.<epoch>-<pid>` backup before any edit)
 
 Restart Claude Code after install. To confirm it works, send any prompt — the rules are re-attached as `additionalContext` on every turn.
+
+> _Previously named `claude-guardrails`. Old URLs redirect; clone URLs still work via GitHub's auto-redirect._
+
+---
+
+## How it works
+
+```mermaid
+flowchart TD
+    A[User types a prompt] --> B[Claude Code UserPromptSubmit hook fires]
+    B --> C{CLAUDE_RULES_DISABLE=1?}
+    C -->|yes| Z[Pass through unchanged]
+    C -->|no| D[Resolve rules file path]
+    D --> E{File readable and within 256 KiB?}
+    E -->|no| Z
+    E -->|yes| F[Strip YAML frontmatter]
+    F --> G[Wrap in critical-rules XML tags]
+    G --> H[Append as additionalContext]
+    H --> I[Claude Code sends enriched prompt to model]
+    I --> J[Model sees rules on every turn]
+    J --> K[r-check skill for on-demand rule lookup]
+```
+
+Path resolution order for the rules file:
+
+1. `CLAUDE_RULES_PATH` env var
+2. First line of `~/.claude/critical-rules.path`
+3. Default: `~/.claude/critical-rules.md`
 
 ---
 

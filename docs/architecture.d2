@@ -1,0 +1,53 @@
+direction: down
+explanation: |md
+  ### claude-rules-injector
+  **Auto-inject critical rules on every turn in Claude Code** — a UserPromptSubmit hook that re-attaches your rules file as additionalContext so salience never fades.
+| {near: top-center}
+
+user: "① User Prompt" {shape: oval; style: {fill: "#6366f1"; font-color: "#fff"; stroke: "#4338ca"; bold: true; font-size: 18}}
+hook: "② UserPromptSubmit\nhook fires" {style: {fill: "#0ea5e9"; font-color: "#fff"; stroke: "#0369a1"; bold: true; font-size: 18}}
+
+bypass: "Bypass check" {
+  style: {fill: "#fffbeb"; stroke: "#f59e0b"; font-color: "#92400e"; bold: true; font-size: 16}
+  disable_check: "CLAUDE_RULES_DISABLE=1?"
+  passthrough: "Pass through\nunchanged"
+  disable_check -> passthrough: "yes"
+  *.style.fill: "#fef3c7"; *.style.font-color: "#92400e"
+}
+
+rules_pipeline: "Rules Injection Pipeline" {
+  style: {fill: "#f0fdf4"; stroke: "#10b981"; font-color: "#065f46"; bold: true; font-size: 16}
+  resolve: "③ Resolve rules\nfile path"
+  readable: "File readable\nwithin 256 KiB?"
+  strip: "④ Strip YAML\nfrontmatter"
+  wrap: "⑤ Wrap in\ncritical-rules XML tags"
+  append: "⑥ Append as\nadditionalContext"
+  resolve -> readable: "check"
+  readable -> strip: "yes"
+  strip -> wrap: "⑥ wrap"
+  wrap -> append: "⑥ append"
+  *.style.fill: "#dcfce7"; *.style.font-color: "#065f46"
+}
+
+model: "⑦ Claude Code\nsends enriched prompt" {style: {fill: "#0ea5e9"; font-color: "#fff"; stroke: "#0369a1"; bold: true; font-size: 18}}
+
+outputs: "Outputs" {
+  style: {fill: "#fdf2f8"; stroke: "#ec4899"; font-color: "#9d174e"; bold: true; font-size: 16}
+  model_sees: "⑧ Model sees rules\non every turn" {shape: cylinder}
+  rcheck: "r-check skill\non-demand rule lookup" {shape: cylinder}
+  *.style.fill: "#fdf2f8"; *.style.font-color: "#9d174e"
+}
+
+user -> hook: "① submit"
+hook -> bypass.disable_check: "② check"
+bypass.disable_check -> rules_pipeline.resolve: "no"
+rules_pipeline.append -> model: "⑦ enrich"
+model -> outputs.model_sees: "⑧ inject"
+model -> outputs.rcheck: "⑧ skill"
+
+legend: "Legend" {
+  near: bottom-center
+  style: {fill: "#f8fafc"; stroke: "#cbd5e1"; font-size: 13}
+  e: "● entry"; c: "● core"; p: "● processing"; b: "● external"; d: "● output"
+  e.style.font-color: "#4338ca"; c.style.font-color: "#0369a1"; p.style.font-color: "#10b981"; b.style.font-color: "#f59e0b"; d.style.font-color: "#ec4899"
+}

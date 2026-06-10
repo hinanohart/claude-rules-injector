@@ -46,21 +46,9 @@ Restart Claude Code after install. To confirm it works, send any prompt — the 
 
 ## How it works
 
-```mermaid
-flowchart TD
-    A[User types a prompt] --> B[Claude Code UserPromptSubmit hook fires]
-    B --> C{CLAUDE_RULES_DISABLE=1?}
-    C -->|yes| Z[Pass through unchanged]
-    C -->|no| D[Resolve rules file path]
-    D --> E{File readable and within 256 KiB?}
-    E -->|no| Z
-    E -->|yes| F[Strip YAML frontmatter]
-    F --> G[Wrap in critical-rules XML tags]
-    G --> H[Append as additionalContext]
-    H --> I[Claude Code sends enriched prompt to model]
-    I --> J[Model sees rules on every turn]
-    J --> K[r-check skill for on-demand rule lookup]
-```
+<div align="center">
+  <img src="docs/architecture.png" alt="claude-rules-injector architecture" width="840">
+</div>
 
 Path resolution order for the rules file:
 
@@ -163,3 +151,4 @@ claude-rules-injector/
 ## License
 
 MIT. See [`LICENSE`](./LICENSE) for full text and a note on the 🔥 verbatim quotes.
+

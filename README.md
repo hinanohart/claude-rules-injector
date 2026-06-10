@@ -4,11 +4,39 @@
 
 > _Previously named `claude-guardrails`. Old URLs redirect; clone URLs still work via GitHub's auto-redirect._
 
-`claude-rules-injector` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as additionalContext on every prompt. Violations short-circuit the task instead of leaking through.
+`claude-rules-injector` is a tiny, auditable layer on top of Claude Code that solves one problem: **rules you write in `CLAUDE.md` are advisory — they may lose salience as the session grows.** This package wires the same rules into a `UserPromptSubmit` hook, so they are re-attached as `additionalContext` on every prompt. Violations short-circuit the task instead of leaking through.
 
 It is opinionated: 13 rules, English summaries with Japanese author-original quotes preserved verbatim per R16. Fork it, edit `critical-rules.md`, and reinstall — the wiring is the value, the rules are an example.
 
 > **Status:** Personal config dump, MIT-licensed for forking. The author uses this for their own workflow; no SLA, support guarantee, or roadmap. Issues and PRs are welcome but may be answered slowly or not at all. The bundled `critical-rules.md` is an example — replace with your own rules before relying on it.
+
+---
+
+## How it works
+
+```mermaid
+flowchart TD
+    A[User types a prompt] --> B[Claude Code UserPromptSubmit hook fires]
+    B --> C{CLAUDE_RULES_DISABLE=1?}
+    C -->|yes| Z[Pass through unchanged]
+    C -->|no| D[Resolve rules file path]
+    D --> E{File readable and within 256 KiB?}
+    E -->|no| Z
+    E -->|yes| F[Strip YAML frontmatter]
+    F --> G[Wrap in critical-rules XML tags]
+    G --> H[Append as additionalContext]
+    H --> I[Claude Code sends enriched prompt to model]
+    I --> J[Model sees rules on every turn]
+    J --> K[r-check skill for on-demand rule lookup]
+```
+
+Path resolution order for the rules file:
+
+1. `CLAUDE_RULES_PATH` env var
+2. First line of `~/.claude/critical-rules.path`
+3. Default: `~/.claude/critical-rules.md`
+
+---
 
 ## Install
 
@@ -38,7 +66,9 @@ The installer:
 - installs the `r-check` skill at `~/.claude/skills/r-check/`
 - registers the hook in `~/.claude/settings.json` (idempotent; creates `.bak.<epoch>-<pid>` backup before any edit)
 
-Restart Claude Code after install. To confirm it works, send any prompt — the rules are re-attached as additionalContext on every turn.
+Restart Claude Code after install. To confirm it works, send any prompt — the rules are re-attached as `additionalContext` on every turn.
+
+---
 
 ## Disable / customize
 
@@ -48,6 +78,8 @@ Restart Claude Code after install. To confirm it works, send any prompt — the 
 | Use your own rules file | `export CLAUDE_RULES_PATH=/path/to/rules.md` |
 | Pin a path persistently | `echo /path/to/rules.md > ~/.claude/critical-rules.path` |
 | Look up one rule | invoke the `r-check` skill or run `~/.claude/skills/r-check/check.sh R11` |
+
+---
 
 ## Uninstall
 
@@ -63,6 +95,8 @@ bash install.sh --uninstall
 
 The manual uninstaller writes a fresh `settings.json.bak.<epoch>-<pid>`, then edits `settings.json` in place to remove only the `claude-rules-injector` hook entry (sibling hooks are preserved). It removes the hook script and the skill. If `$HOME/.claude/critical-rules.md` was modified after install, it is preserved as `critical-rules.md.bak.<epoch>-<pid>` instead of being deleted.
 
+---
+
 ## What's in the rules
 
 13 rules across three priority tiers. Lines prefixed with `🔥` reproduce the original Japanese wording verbatim and should not be reworded (see R16); each is followed by an English paraphrase and an operational line.
@@ -77,6 +111,8 @@ The numbering has intentional gaps (R0/R3/R4/R6/R9/R10 are omitted) because some
 
 See [`critical-rules.md`](./critical-rules.md) for the full text.
 
+---
+
 ## Non-goals
 
 - **Not a sandbox.** This package shapes Claude's *behavior*, not its *permissions*. Use Claude Code's built-in permission system for hard limits.
@@ -85,16 +121,22 @@ See [`critical-rules.md`](./critical-rules.md) for the full text.
 - **Not framework-agnostic.** Targets Claude Code specifically (uses its `UserPromptSubmit` hook and `skills/` layout).
 - **No telemetry, no network calls.** The hook only `cat`s a local file.
 
+---
+
 ## Why a hook and not just `CLAUDE.md`?
 
-`CLAUDE.md` is loaded once into the session prefix. As the conversation grows, earlier instructions can lose salience against more recent context. The hook re-attaches the rules as additionalContext on every prompt — the repetition keeps them fresh and the system-reminder framing increases instruction-following adherence. For rules where drift is unacceptable (security, secret handling, cross-session privacy), this is the difference between "usually followed" and "consistently followed."
+`CLAUDE.md` is loaded once into the session prefix. As the conversation grows, earlier instructions can lose salience against more recent context. The hook re-attaches the rules as `additionalContext` on every prompt — the repetition keeps them fresh and the system-reminder framing increases instruction-following adherence. For rules where drift is unacceptable (security, secret handling, cross-session privacy), this is the difference between "usually followed" and "consistently followed."
 
 If you don't need that guarantee, just use `CLAUDE.md` and skip this package.
+
+---
 
 ## Known limitations
 
 - **Not yet listed in the official Anthropic plugin marketplace.** Self-hosted as a single-plugin marketplace at this repo; users must `/plugin marketplace add` it explicitly. Submitting to `claude-plugins-official` is a manual form: [claude.ai/settings/plugins/submit](https://claude.ai/settings/plugins/submit).
 - **Behavior-shaping, not permission-enforcement.** Use Claude Code's permission system for hard limits — see Non-goals above.
+
+---
 
 ## Layout
 
@@ -115,6 +157,8 @@ claude-rules-injector/
 ├── CHANGELOG.md
 └── LICENSE                    # MIT
 ```
+
+---
 
 ## License
 
